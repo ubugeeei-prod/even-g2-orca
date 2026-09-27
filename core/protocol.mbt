@@ -89,7 +89,7 @@ pub(all) struct BridgeInfo {
 
 ///|
 pub fn api_error(status : Int, code : String, message : String) -> ApiError {
-  { status, code, message }
+  { status, code, message, }
 }
 
 ///|
@@ -189,7 +189,7 @@ pub fn Receipt::from_json(json : Json) -> Receipt? {
   guard obj(json) is Some(map) else { return None }
   guard get_bool(map, "accepted") is Some(accepted) else { return None }
   guard get_str(map, "message") is Some(message) else { return None }
-  Some({ accepted, message, request_id: get_str(map, "requestId") })
+  Some({ accepted, message, request_id: get_str(map, "requestId"), })
 }
 
 ///|

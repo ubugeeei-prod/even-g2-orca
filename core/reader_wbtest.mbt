@@ -30,7 +30,7 @@ fn ready() -> Model raise {
   let model = Model::new()
   let effects = model.update(Configured(true))
   @debug.debug_inspect(effects, content="[LoadInfo, LoadSessions(1)]")
-  model.update(Info({ version: "1", speech: true, runtime_ready: true }))
+  model.update(Info({ version: "1", speech: true, runtime_ready: true, }))
   |> ignore
   model.update(SessionsLoaded(1, [session("a", "Alpha"), session("b", "Beta")]))
   |> ignore
@@ -126,7 +126,7 @@ test "a prompt is sent only from the last confirmation page" {
   @debug.debug_inspect(model.screen, content="Sending")
   model.update(Gesture(Tap)) |> ignore
   @debug.debug_inspect(model.screen, content="Sending")
-  model.update(ActionDone({ accepted: true, message: "ok", request_id: None }))
+  model.update(ActionDone({ accepted: true, message: "ok", request_id: None, }))
   |> ignore
   @debug.debug_inspect(
     model.frame().body,

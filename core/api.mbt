@@ -163,7 +163,7 @@ fn valid_operation_id(id : String) -> Bool {
 ///|
 /// Normalize newlines and drop other control characters from a prompt.
 pub fn sanitize_prompt(text : String) -> String {
-  let out = StringBuilder::new()
+  let out = StringBuilder()
   let chars = text.to_array()
   for i, c in chars {
     let code = c.to_int()

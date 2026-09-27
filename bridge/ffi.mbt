@@ -119,7 +119,7 @@ extern "js" fn socket_exchange(
 /// stdout is kept on failure because a refusal may be printed as JSON.
 extern "js" fn run_program(
   program : String,
-  args : Array[String],
+  args : FixedArray[String],
   timeout_ms : Int,
   done : (Bool, String) -> Unit,
 ) -> Unit =

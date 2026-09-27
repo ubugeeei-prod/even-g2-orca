@@ -20,7 +20,7 @@ pub struct OperationLog {
 
 ///|
 pub fn OperationLog::new() -> OperationLog {
-  { entries: {} }
+  { entries: {}, }
 }
 
 ///|
@@ -48,7 +48,7 @@ pub fn OperationLog::begin(
     Some({ state: Pending, .. }) => InFlight
     Some({ state: Finished(status, body), .. }) => Replay(status, body)
     None => {
-      self.entries[id] = { fingerprint, at: now, state: Pending }
+      self.entries[id] = { fingerprint, at: now, state: Pending, }
       Fresh
     }
   }

@@ -64,7 +64,7 @@ fn cli(
   args : Array[String],
   k : (Result[Json, @core.ApiError]) -> Unit,
 ) -> Unit {
-  run_program(config.cli, args, 25000, fn(_ok, stdout) {
+  run_program(config.cli, FixedArray::from_array(args), 25000, fn(_ok, stdout) {
     if stdout.trim().is_empty() {
       k(Err(@core.delivery_unknown()))
     } else {
@@ -183,7 +183,7 @@ fn transcribe(
         fn() {
           run_program(
             config.whisper_cli,
-            [
+            FixedArray::from_array([
               "-m",
               config.whisper_model,
               "-f",
@@ -194,7 +194,7 @@ fn transcribe(
               "-of",
               output,
               "-nt",
-            ],
+            ]),
             120000,
             fn(ok, _stdout) {
               if !ok {

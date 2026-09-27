@@ -17,7 +17,7 @@ pub fn Frame::to_json(self : Frame) -> Json {
 
 ///|
 fn join(lines : Array[String]) -> String {
-  let out = StringBuilder::new()
+  let out = StringBuilder()
   for i, line in lines {
     if i > 0 {
       out.write_char('\n')

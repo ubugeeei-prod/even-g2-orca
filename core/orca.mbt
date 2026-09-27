@@ -40,7 +40,7 @@ pub fn runtime_endpoint(metadata : String) -> Result[RuntimeEndpoint, ApiError] 
     match (get_str(t, "kind"), get_str(t, "endpoint")) {
       (Some("unix"), Some(endpoint)) | (Some("named-pipe"), Some(endpoint)) =>
         if endpoint.length() > 0 {
-          return Ok({ endpoint, auth_token, runtime_id })
+          return Ok({ endpoint, auth_token, runtime_id, })
         }
       _ => ()
     }
@@ -340,5 +340,5 @@ pub fn receipt_from_send(
   } else {
     "入力は受け付けられました。実行開始は未確認です。再送する前に出力を確認してください。"
   }
-  Ok({ accepted, message, request_id })
+  Ok({ accepted, message, request_id, })
 }

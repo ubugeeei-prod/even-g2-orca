@@ -36,7 +36,7 @@ pub fn text_width(text : String) -> Int {
 /// Remove ANSI CSI / OSC sequences and nonprinting controls from terminal text.
 /// Tabs become four spaces; newlines are kept.
 pub fn clean_terminal_text(text : String) -> String {
-  let out = StringBuilder::new()
+  let out = StringBuilder()
   let chars = text.to_array()
   let n = chars.length()
   let mut i = 0
@@ -114,7 +114,7 @@ pub fn trim_end_spaces(text : String) -> String {
 pub fn wrap_text(text : String, columns : Int) -> Array[String] {
   let limit = if columns < 2 { 2 } else { columns }
   let lines : Array[String] = []
-  let row = StringBuilder::new()
+  let row = StringBuilder()
   let mut width = 0
   for char in text {
     if char == '\n' {
@@ -172,7 +172,7 @@ pub fn clip_text(text : String, columns : Int) -> String {
   if text_width(text) <= limit {
     return text
   }
-  let out = StringBuilder::new()
+  let out = StringBuilder()
   let mut width = 0
   for char in text {
     let size = cell_width(char)
