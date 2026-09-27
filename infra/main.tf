@@ -90,9 +90,8 @@ resource "cloudflare_workers_script" "app" {
 }
 
 resource "cloudflare_workers_custom_domain" "app" {
-  account_id  = var.account_id
-  zone_id     = var.zone_id
-  hostname    = var.app_hostname
-  service     = cloudflare_workers_script.app.script_name
-  environment = "production"
+  account_id = var.account_id
+  zone_id    = var.zone_id
+  hostname   = var.app_hostname
+  service    = cloudflare_workers_script.app.script_name
 }
