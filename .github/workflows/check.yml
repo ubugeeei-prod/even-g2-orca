@@ -1,0 +1,72 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          version: 1.0.0-rc.1
+          node-version-file: .node-version
+          run-install: false
+          cache: true
+      - run: vp install --frozen-lockfile
+      - name: Install official MoonBit toolchain
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh -o "$RUNNER_TEMP/install-moon.sh"
+          bash "$RUNNER_TEMP/install-moon.sh"
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - run: moon version
+      - run: moon fmt --check
+      - run: moon test --target js --deny-warn
+      - run: vp run build:core
+      - run: vp check
+      - run: vp test run
+      - run: vp build
+      - name: Validate Cloudflare Worker bundle
+        run: vp exec wrangler deploy --dry-run --outdir .local/worker-build
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+      - run: vp exec playwright install --with-deps chromium
+      - run: vp run test:e2e
+      - name: Validate Even Hub package
+        run: vp run pack -- https://example.invalid
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.0
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+      - run: terraform test

@@ -1,0 +1,20 @@
+{
+  "package_id": "dev.ubugeeei.evenorca",
+  "edition": "202601",
+  "name": "Orca for G2",
+  "version": "0.1.0",
+  "min_sdk_version": "0.0.16",
+  "entrypoint": "index.html",
+  "permissions": [
+    {
+      "name": "network",
+      "desc": "Connect to your paired Orca bridge.",
+      "whitelist": ["http://localhost:3210"]
+    },
+    {
+      "name": "g2-microphone",
+      "desc": "Dictate a prompt when you choose Record. Review the transcript before sending."
+    }
+  ],
+  "supported_languages": ["en", "ja"]
+}

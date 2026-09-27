@@ -1,0 +1,4 @@
+# Copy to your own ignored *.tfvars file and replace every example value.
+account_id      = "your-cloudflare-account-id"
+zone_id         = "your-cloudflare-zone-id"
+bridge_hostname = "orca-bridge.example.com"

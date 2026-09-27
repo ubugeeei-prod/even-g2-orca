@@ -1,0 +1,35 @@
+{
+  "name": "even-g2-orca",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev --host 0.0.0.0",
+    "bridge": "node --env-file-if-exists=.env server/main.ts",
+    "start": "vp build && vp run bridge",
+    "build": "vp build",
+    "test": "vp test run",
+    "test:e2e": "playwright test",
+    "check": "vp check",
+    "pack": "node scripts/pack.ts",
+    "simulator": "evenhub-simulator http://localhost:5173"
+  },
+  "dependencies": {
+    "@evenrealities/even_hub_sdk": "0.0.16",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260927.1",
+    "@evenrealities/evenhub-cli": "0.1.14",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^24.10.0",
+    "@types/qrcode": "^1.5.6",
+    "typescript": "7.0.2",
+    "vite-plus": "1.0.0-rc.1",
+    "wrangler": "^4.77.0"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "packageManager": "pnpm@12.6.0"
+}
