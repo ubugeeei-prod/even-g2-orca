@@ -1,21 +1,4 @@
-supported_targets = "js"
-
 import {
   "moonbitlang/core/json",
+  "moonbitlang/core/debug",
 }
-
-pkgtype(kind: "foreign_library")
-
-options(
-  link: {
-    "js": {
-      "format": "esm",
-      "exports": [
-        "paginate_json",
-        "clip_text",
-        "reduce_reader_json",
-        "navigation_json",
-      ],
-    },
-  },
-)

@@ -1,4 +1,4 @@
-name = "ubugeeei/even_orca"
+name = "ubugeeei/even_g2_orca"
 
 version = "0.1.0"
 

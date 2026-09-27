@@ -1,63 +1,64 @@
 # 設計
 
-進捗・返答の閲覧を主機能とする。操作はセッションを選択した後に行い、指示と停止は確認画面から明示的に実行する。
+G2 の画面に出すものと、入力で何が起きるかは、すべて `core/` の純粋関数で決まる。各実行環境（スマートフォン、Mac、Cloudflare）には、副作用を実行するだけの薄いアダプターを置く。
 
 ```mermaid
 flowchart LR
   G2[Even G2 / R1] <--> SDK[Even Hub SDK]
-  SDK <--> App[Phone WebView]
-  Core[MoonBit pure core] --> App
-  App --> Worker[Cloudflare Worker + assets]
-  Worker --> Access[Cloudflare Access service authentication]
+  SDK <--> App[app/ WebView]
+  Core[core/ 純粋関数] --> App
+  Core --> Worker
+  Core --> Bridge
+  App --> Worker[worker/ Cloudflare Worker + assets]
+  Worker --> Access[Cloudflare Access service token]
   Access --> Tunnel[Cloudflare Tunnel]
-  Tunnel --> Bridge[Mac Node.js bridge]
-  Bridge --> RPC[Orca local authenticated RPC]
-  Bridge --> CLI[Orca CLI prompt delivery]
+  Tunnel --> Bridge[bridge/ Node.js on Mac]
+  Bridge --> RPC[Orca ローカル RPC（読み取り）]
+  Bridge --> CLI[Orca CLI（送信・停止）]
 ```
 
-## 責務と境界
+## 責務
 
-| 層                  | 責務                                                   | 副作用                          |
-| ------------------- | ------------------------------------------------------ | ------------------------------- |
-| `core/*.mbt`        | Unicode の折り返し、ページ分割、閲覧状態と入力遷移     | なし。入力から新しい値を返す    |
-| `src/controller.ts` | polling、スナップショットの保持、core の effect の解釈 | HTTP / SDK を注入可能           |
-| `src/even.ts`       | 576 × 288 のコンテナー、ジェスチャー、PCM キャプチャ   | 公式 SDK のみ                   |
-| `server/orca.ts`    | セッション一覧・画面・状態、送信 receipt の解釈        | ローカル RPC / CLI              |
-| `server/http.ts`    | bearer 認証、入力制限、操作 ID の重複抑制              | 限定した API のみ公開           |
-| `worker/index.ts`   | assets 配信、固定した origin への API 中継             | Access 資格情報は server secret |
-| `infra/*.tf`        | Tunnel、DNS、Access と service token                   | Terraform が管理                |
-| `wrangler.jsonc`    | Worker コード、assets、bindings                        | Wrangler が管理                 |
+| 場所            | 責務                                                                 | 副作用 |
+| --------------- | -------------------------------------------------------------------- | ------ |
+| `core/reader`   | `Model::update(Msg) -> Array[Effect]`。画面遷移、追従、世代管理     | なし   |
+| `core/view`     | `Model::frame()`。G2 の 3 コンテナーの文字列                         | なし   |
+| `core/text`     | 表示セル幅、折り返し、ページ分割、端末制御文字の除去                 | なし   |
+| `core/orca`     | RPC フレーム・CLI の JSON・送信 receipt の解釈                       | なし   |
+| `core/api`      | ルーティング、bearer の定数時間比較、本文の検証、CORS、WAV ヘッダー  | なし   |
+| `core/relay`    | Worker が中継するか・何を返すかの判断                                | なし   |
+| `app/`          | effect の実行（HTTP・タイマー・マイク）、G2 への直列書き込み         | あり   |
+| `bridge/`       | HTTP サーバー、Orca の RPC / CLI、whisper.cpp、操作 ID の記録       | あり   |
+| `worker/`       | assets 配信、Access 資格情報を付けた中継                             | あり   |
+| `infra/`        | Worker・assets・secret binding・Tunnel・DNS・Access                  | Terraform |
 
-MoonBit は JS backend の ESM にコンパイルする。FFI は JSON と文字列・整数・真偽値に限定し、コンパイラーの enum/struct 表現に依存しない。TypeScript 7 は薄いアダプターの型検証に使い、Mac の実行は Node.js の型除去だけで行う。自作 class は使わない。SDK のコンテナー型だけは公式コンストラクターで生成する。
+FFI の境界では文字列・数値・真偽値・`Bytes`（Uint8Array）と不透明な host 値だけを受け渡し、JSON は MoonBit 側で解釈する。Node.js の組み込みモジュールは `process.getBuiltinModule` で取得するので、ブリッジはバンドラーなしで動く。Worker は MoonBit の main が `globalThis` に登録したハンドラーを、ビルド時に付け足す `export default` から呼ぶ。
 
 ## 閲覧の一貫性
 
-出力は Orca の現在のターミナル画面を取得する。画面が取れない場合は履歴に fallback し、その事実を UI に表示する。状態が未知のときは「状態不明」とし、成功・完了を推測しない。polling と一覧の更新周期、応答サイズ、G2 のレイアウトは `shared/config.ts` にまとめる。
-
-上・下のスワイプで追従を解除すると、その時点の出力を固定する。新しい出力は別スナップショットに保持し、追従を再開したときに切り替える。セッションを切り替えた後に古い HTTP 応答が到着しても、選択したセッションの ID を照合して破棄する。接続切れは明示し、保存済み出力を最新状態として見せない。
-
-一覧が並び替わってもカーソル位置は session ID で維持する。指示の確認は複数ページに分割し、G2 の tap は最終ページに到達するまで送信しない。polling は単一 flight とし、破棄時に generation を進めて古い応答と次の timer 登録を無効にする。
+- 出力は Orca が描画している画面（`terminal.read --screen`）を読む。取れないときは履歴に落とし、その旨を返す。エージェントの状態が読めなければ「状態不明」とし、成功を推測しない。
+- ページは末尾基準で分割し、最新ページが常に埋まるようにする。上へ移動すると追従を止め、表示中のスナップショットを固定する。新着は別に保持し、「新着あり」と示す。
+- セッションを切り替える・一覧へ戻る・録音を取り消すたびに世代を進め、古い世代の応答とタイマーを捨てる。ポーリングは応答を受けてから次を予約するので、同時に 1 本しか走らない。
+- カーソルはセッション ID で保持し、一覧の並び替えでずれない。接続が切れたら見出しに示し、保存済みの出力を最新のように見せない。401 を受けたら設定画面へ戻る。
 
 ## 操作の配送
 
-API は毎回 `terminal.agentStatus` で実行中の agent を確認する。通常のシェルへの入力を拒否し、prompt は shell を経由せず CLI の独立した引数で渡す。`terminal send --enter --wait-submit` の durable receipt を読み、input acceptance と turn start の観測を区別する。Ctrl-C の送信は「停止入力を送った」と表示し、停止完了は断言しない。
-
-同じ operation ID と payload の並行要求は一つの promise を共有する。失敗も保存して、自動再送しない。重複抑制はブリッジプロセス内・24 時間で、永続的な exactly-once 保証ではない。タイムアウト、プロセス再起動、曖昧な receipt の後は画面を確認してから新しい操作を選ぶ。
+- 送信の前に毎回 `terminal.agentStatus` を確認し、エージェントが動いていない端末（素のシェル）には送らない。
+- 指示は CLI の独立した引数として渡し、シェルを経由しない。`--wait-submit` の receipt を読み、「受け付けた」と「実行開始を観測した」を区別して表示する。停止は「停止の入力を送った」と表示し、止まったとは言わない。
+- クライアントは操作ごとに新しい operation ID を付ける。ブリッジは同じ ID の処理中の要求を 409 で断り、完了した要求には同じ応答を返し、別内容での再利用を拒否する。CLI に渡す前に失敗した操作は記録しないので、同じ ID で再試行できる。記録はプロセス内・24 時間で、再起動をまたぐ保証はない。
 
 ## 接続とインフラ
 
-端末が持つのは user pairing token だけ。Worker は bearer を Mac に転送し、Worker の Access service token を別ヘッダーで付ける。Access の資格情報、Orca のローカル RPC authToken、Tunnel token は端末へ渡さない。Worker は設定された HTTPS origin と API allowlist にしか中継せず、redirect を追わない。
+- スマートフォンが持つのはペアリング用トークンだけ。URL の fragment で受け取り、読み取ったら履歴から消して localStorage に保存する。
+- Worker は `/api/*` の既知のルートだけを、設定された `https://` のホスト名へ中継する。redirect は追わない（Access のログイン画面への redirect は設定不備として 502）。Access の service token は Terraform が Worker の secret binding に直接設定するので、人手で secret を扱わない。
+- Tunnel は Mac の loopback のブリッジへだけ転送し、それ以外のホストは 404。Access は Worker の service token だけを通す。
+- Terraform の state には Tunnel token と service token が入る。state は暗号化された private backend に置く。CI では mock provider の plan だけを実行し、実リソースは作らない。
 
-Web URL は same-origin で動作する。別 origin の package は `ALLOWED_ORIGINS` で明示し、認証ヘッダーの preflight を許可する。pack 時には public API origin のみを埋め込み、token を生成物に含めない。認証のない CORS 許可だけで操作権限を与えることはない。
+## ビルド
 
-Terraform と Wrangler の管理対象を分け、Worker 本体を Terraform で二重管理しない。Terraform の state に service secret が入るため、state は暗号化された private backend に保存する。本番 apply は CI の PR 検証では実行しない。検証は mock plan と schema validation のみ。
+- `nix/moonbit.nix` は MoonBit の公式バイナリを内容ハッシュで固定し、JS 用の標準ライブラリを bundle する。MoonBit は `latest` しか配布しないので、上流が更新されるとハッシュ不一致でビルドが止まる。`nix run .#update-moonbit` で固定し直す。
+- Even Hub SDK は npm の tarball を integrity で検証して取り込み、`web/boot.js` が動的 import する。SDK がない・接続できない環境ではプレビューとして動く。
 
-## 音声とライフサイクル
+## 検証範囲
 
-音声は任意機能。G2 の 16 kHz PCM16 mono を最大 60 秒取得して WAV にし、Mac の whisper.cpp で認識する。外部 STT への送信はない。recognition は prompt draft を作るだけで、送信は内容確認後の操作になる。録音終了・取消・ページ破棄時にマイクを閉じる。
-
-## 互換性と検証範囲
-
-初版は Orca の **ターミナル形式の agent session** を対象とする。ローカル RPC の read-only メソッドは Orca 1.4.206 で確認した内部インターフェースで、公開 SDK の安定保証はない。Orca の native chat、過去の閉じたセッション、質問・権限ダイアログへの回答は別アダプターが必要。未対応の状態を読み取れたことにしない。
-
-CI は MoonBit の純粋関数、SDK の container validation、HTTP の認証と重複抑制、CLI adapter、Worker relay、閲覧競合を検証する。Playwright は接続設定・出力・確認・mobile のブラウザ動作を検証する。実際の G2 のフォント、Bluetooth、Even App の background behavior は実機で別途確認する。
+`moon test` はコアの状態遷移（古い応答の破棄、追従と一時停止、最終ページでの送信、停止の確認、録音の取り消し、401、接続切れ）、Orca 応答の解釈、ルーティング、認証、操作 ID、中継の判断を検証する。Terraform は mock plan で Access・Tunnel・secret binding の構成を検証する。実機 G2 のフォント・Bluetooth・Even App の挙動と、実際の Cloudflare への配置は自動テストの対象外。

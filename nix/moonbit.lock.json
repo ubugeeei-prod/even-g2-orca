@@ -1,0 +1,33 @@
+{
+  "$comment": [
+    "MoonBit publishes only rolling `latest` URLs, so the toolchain is pinned by",
+    "content hash. When upstream rolls, the hash stops matching and the build",
+    "fails loudly instead of silently changing compiler. Re-pin with:",
+    "",
+    "    nix run .#update-moonbit",
+    "",
+    "`version` is informational; the hashes are what is enforced."
+  ],
+  "moonbit": {
+    "version": "0.1.20260827",
+    "moonc": "v0.10.11+8f8e8db1e",
+    "date": "2026-08-27",
+    "baseUrl": "https://cli.moonbitlang.com/binaries/latest",
+    "coreUrl": "https://cli.moonbitlang.com/cores/core-latest.zip",
+    "coreHash": "sha256-+wqrskwLEkN4OhP+a2EDMPgDH+BPC3lFs/vXkCJJnOg=",
+    "platforms": {
+      "aarch64-darwin": {
+        "asset": "moonbit-darwin-aarch64.tar.gz",
+        "hash": "sha256-6WSVpQMXOM7oU7vq1M9z96hOt1GKAXT+vW+SpFQaQuQ="
+      },
+      "x86_64-linux": {
+        "asset": "moonbit-linux-x86_64.tar.gz",
+        "hash": "sha256-vXyAnf93iYjMc1gEbMaOETiNGnKeWvr4cy/QZrE+8F4="
+      },
+      "aarch64-linux": {
+        "asset": "moonbit-linux-aarch64.tar.gz",
+        "hash": "sha256-y2F2o/9+NSthLLelnqyRoyMo1gRAmJomtzAuHnHUmCc="
+      }
+    }
+  }
+}

@@ -8,5 +8,5 @@ terraform {
   }
 }
 
-# Authentication is read from CLOUDFLARE_API_TOKEN, never from source or tfvars.
+# Authentication comes from CLOUDFLARE_API_TOKEN, never from source or tfvars.
 provider "cloudflare" {}

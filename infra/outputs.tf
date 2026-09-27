@@ -1,22 +1,15 @@
+output "app_url" {
+  description = "Open this with the bridge's pairing token: <app_url>/#token=..."
+  value       = "https://${var.app_hostname}"
+}
+
 output "bridge_origin" {
-  description = "Set this nonsecret value as Wrangler's ORCA_BRIDGE_ORIGIN."
+  description = "Tunnel hostname the Worker relays to (protected by Access)."
   value       = "https://${var.bridge_hostname}"
 }
 
 output "tunnel_token" {
-  description = "Mac cloudflared TUNNEL_TOKEN. Keep Terraform state private."
-  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.orca.token
-  sensitive   = true
-}
-
-output "access_client_id" {
-  description = "Pipe into wrangler secret put ACCESS_CLIENT_ID."
-  value       = cloudflare_zero_trust_access_service_token.worker.client_id
-  sensitive   = true
-}
-
-output "access_client_secret" {
-  description = "Pipe into wrangler secret put ACCESS_CLIENT_SECRET."
-  value       = cloudflare_zero_trust_access_service_token.worker.client_secret
+  description = "TUNNEL_TOKEN for `cloudflared tunnel run` on the Mac. Keep state private."
+  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.bridge.token
   sensitive   = true
 }
