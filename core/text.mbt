@@ -212,7 +212,7 @@ pub fn basename(path : String) -> String {
 }
 
 ///|
-/// Terminal UIs draw full-width rules; on the glasses a short marker is enough.
+/// Full-width terminal rules carry no useful information on the glasses.
 pub fn display_line(line : String) -> String {
   if line.length() < 8 {
     return line
@@ -222,7 +222,7 @@ pub fn display_line(line : String) -> String {
       return line
     }
   }
-  "--------"
+  ""
 }
 
 ///|

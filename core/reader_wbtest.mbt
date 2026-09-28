@@ -50,7 +50,32 @@ test "session list keeps the cursor by id across reordering" {
   model.update(SessionsLoaded(1, [session("c", "C"), session("b", "Beta")]))
   |> ignore
   @debug.debug_inspect(model.cursor, content="Some(\"b\")")
-  @debug.debug_inspect(model.frame().body.contains("> Beta"), content="true")
+  @debug.debug_inspect(
+    model.frame().body.contains("> app / Beta"),
+    content="true",
+  )
+}
+
+///|
+test "session list shows four compact rows and keeps the selection visible" {
+  let model = ready()
+  model.update(
+    SessionsLoaded(1, [
+      session("a", "Alpha"),
+      session("b", "Beta"),
+      session("c", "Gamma"),
+      session("d", "Delta"),
+      session("e", "Epsilon"),
+    ]),
+  )
+  |> ignore
+  for _ in 0..<4 {
+    model.update(Gesture(Down)) |> ignore
+  }
+  let frame = model.frame()
+  @debug.debug_inspect(frame.body.split("\n").count(), content="4")
+  @debug.debug_inspect(frame.body.contains("> app / Epsilon"), content="true")
+  @debug.debug_inspect(frame.body.contains("Alpha"), content="false")
 }
 
 ///|
@@ -80,15 +105,10 @@ test "reading follows new output until the user pages back" {
     model.update(OutputLoaded(2, output("a", many(14), 1))),
     content="[Schedule(2, 2000)]",
   )
-  @debug.debug_inspect(model.page, content="2")
+  @debug.debug_inspect(model.page, content="3")
   // The newest page is full; only the oldest page may be short.
-  @debug.debug_inspect(model.frame().body.split("\n").count(), content="6")
-  @debug.debug_inspect(
-    model.frame().footer,
-    content=(
-      #|"3/3 追従  タップ 操作"
-    ),
-  )
+  @debug.debug_inspect(model.frame().body.split("\n").count(), content="4")
+  @debug.debug_inspect(model.frame().footer, content="\"4/4\"")
   model.update(Gesture(Up)) |> ignore
   @debug.debug_inspect(model.follow, content="false")
   model.update(OutputLoaded(2, output("a", many(20), 2))) |> ignore
@@ -96,12 +116,7 @@ test "reading follows new output until the user pages back" {
     model.shown.map(fn(o) { o.lines.length() }),
     content="Some(14)",
   )
-  @debug.debug_inspect(
-    model.frame().footer,
-    content=(
-      #|"2/3 一時停止 新着あり  タップ 操作"
-    ),
-  )
+  @debug.debug_inspect(model.frame().footer, content="\"3/4  新着あり\"")
   model.update(Gesture(Down)) |> ignore
   model.update(Gesture(Down)) |> ignore
   @debug.debug_inspect(model.follow, content="true")
@@ -109,7 +124,53 @@ test "reading follows new output until the user pages back" {
     model.shown.map(fn(o) { o.lines.length() }),
     content="Some(20)",
   )
-  @debug.debug_inspect(model.page, content="3")
+  @debug.debug_inspect(model.page, content="4")
+}
+
+///|
+test "reading shows the last four meaningful terminal lines" {
+  let model = ready()
+  model.update(Gesture(Tap)) |> ignore
+  model.update(
+    OutputLoaded(
+      2,
+      output(
+        "a",
+        [
+          "first", "", "────────", "second", " ", "third", "fourth",
+          "fifth",
+        ],
+        1,
+      ),
+    ),
+  )
+  |> ignore
+  @debug.debug_inspect(
+    model.frame().body,
+    content="\"second\\nthird\\nfourth\\nfifth\"",
+  )
+}
+
+///|
+test "menu keeps the selected action inside four rows" {
+  let model = ready()
+  model.update(Gesture(Tap)) |> ignore
+  model.update(OutputLoaded(2, output("a", many(8), 1))) |> ignore
+  model.update(Gesture(Up)) |> ignore
+  model.update(Gesture(Tap)) |> ignore
+  for _ in 0..<4 {
+    model.update(Gesture(Down)) |> ignore
+  }
+  let frame = model.frame()
+  @debug.debug_inspect(frame.body.split("\n").count(), content="4")
+  @debug.debug_inspect(
+    frame.body.contains("> セッション一覧へ"),
+    content="true",
+  )
+  @debug.debug_inspect(
+    frame.body.contains("音声で指示する"),
+    content="false",
+  )
 }
 
 ///|

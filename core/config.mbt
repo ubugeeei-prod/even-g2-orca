@@ -7,16 +7,16 @@ pub const DISPLAY_HEIGHT : Int = 288
 
 ///|
 /// Conservative text budget of the body container, in display cells.
-pub const BODY_COLUMNS : Int = 56
+pub const BODY_COLUMNS : Int = 42
 
 ///|
-pub const BODY_ROWS : Int = 6
+pub const BODY_ROWS : Int = 4
 
 ///|
-pub const HEADING_COLUMNS : Int = 52
+pub const HEADING_COLUMNS : Int = 42
 
 ///|
-pub const SESSIONS_PER_PAGE : Int = 3
+pub const SESSIONS_PER_PAGE : Int = 4
 
 ///|
 /// Polling cadence in milliseconds.

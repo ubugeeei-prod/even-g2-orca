@@ -51,12 +51,17 @@ fn session_lines(model : Model) -> Array[String] {
       Offline(message) => wrap_text(message, BODY_COLUMNS)
       Online =>
         [
-          "エージェントのセッションがありません。", "Mac の Orca でエージェントを起動してください。",
+          "セッションがありません", "Mac で Orca を開いてください",
         ]
     }
   }
   let index = model.cursor_index()
-  let first = index / SESSIONS_PER_PAGE * SESSIONS_PER_PAGE
+  let last_first = if count > SESSIONS_PER_PAGE {
+    count - SESSIONS_PER_PAGE
+  } else {
+    0
+  }
+  let first = clamp(index - 1, 0, last_first)
   let lines : Array[String] = []
   for i in first..<(first + SESSIONS_PER_PAGE) {
     if i >= count {
@@ -64,13 +69,10 @@ fn session_lines(model : Model) -> Array[String] {
     }
     let s = model.sessions[i]
     let mark = if i == index { "> " } else { "  " }
-    lines.push(mark + clip_text(s.title, BODY_COLUMNS - 2))
-    let detail = if s.branch.length() > 0 {
-      "\{s.project} / \{s.branch}"
-    } else {
-      s.project
-    }
-    lines.push("  " + clip_text(detail, BODY_COLUMNS - 2))
+    lines.push(
+      mark +
+      clip_text("\{clip_text(s.project, 12)} / \{s.title}", BODY_COLUMNS - 2),
+    )
   }
   lines
 }
@@ -81,13 +83,8 @@ pub fn Model::frame(self : Model) -> Frame {
   match self.screen {
     Setup =>
       {
-        title: "Orca for G2",
-        body: join(
-          wrap_text(
-            "スマートフォンでブリッジの接続先とペアリング用トークンを設定してください。",
-            BODY_COLUMNS,
-          ),
-        ),
+        title: "接続設定",
+        body: "スマホでブリッジに接続してください",
         footer: "",
       }
     Sessions => {
@@ -100,7 +97,11 @@ pub fn Model::frame(self : Model) -> Frame {
       {
         title: heading(self, "セッション" + position),
         body: join(session_lines(self)),
-        footer: "上下 選択  タップ 開く  ダブル 更新",
+        footer: if count > 0 {
+          "タップで開く"
+        } else {
+          ""
+        },
       }
     }
     Reading => {
@@ -115,91 +116,113 @@ pub fn Model::frame(self : Model) -> Frame {
         None => "読み込み中"
       }
       let body = match self.shown {
-        Some(_) => join(pages[page])
+        Some(_) =>
+          if pages[page].is_empty() {
+            "出力待ち"
+          } else {
+            join(pages[page])
+          }
         None =>
           match self.connection {
             Offline(message) => join(wrap_text(message, BODY_COLUMNS))
             _ => "読み込み中..."
           }
       }
-      let mode = if self.follow { "追従" } else { "一時停止" }
       let fresh = match (self.shown, self.latest) {
         (Some(a), Some(b)) if !self.follow && a.captured_at != b.captured_at =>
-          " 新着あり"
+          "新着あり"
         _ => ""
       }
-      {
-        title: heading(self, "\{state} | \{title}"),
-        body,
-        footer: "\{page + 1}/\{pages.length()} \{mode}\{fresh}  タップ 操作",
+      let position = if pages.length() > 1 {
+        "\{page + 1}/\{pages.length()}"
+      } else {
+        ""
       }
+      let note = if fresh != "" {
+        fresh
+      } else if !self.follow {
+        "一時停止"
+      } else {
+        ""
+      }
+      let footer = if position == "" {
+        note
+      } else if note == "" {
+        position
+      } else {
+        "\{position}  \{note}"
+      }
+      { title: heading(self, "\{state}  \{title}"), body, footer, }
     }
     Menu => {
       let items = self.menu_items()
-      let lines = items.mapi(fn(i, item) {
-        (if i == self.menu { "> " } else { "  " }) + item.label()
-      })
+      let last_first = if items.length() > BODY_ROWS {
+        items.length() - BODY_ROWS
+      } else {
+        0
+      }
+      let first = clamp(self.menu - 1, 0, last_first)
+      let lines : Array[String] = []
+      for i in first..<items.length() {
+        if lines.length() >= BODY_ROWS {
+          break
+        }
+        lines.push(
+          (if i == self.menu { "> " } else { "  " }) + items[i].label(),
+        )
+      }
       {
         title: heading(self, "操作"),
         body: join(lines),
-        footer: "タップ 決定  ダブル 戻る",
+        footer: "\{self.menu + 1}/\{items.length()}  タップで決定",
       }
     }
     ConfirmPrompt => {
       let pages = self.draft_pages()
       let page = clamp(self.draft_page, 0, pages.length() - 1)
       let last = page == pages.length() - 1
-      let lines = pages[page].copy()
-      if last {
-        lines.push("-- タップで送信 --")
-      }
       {
         title: heading(
           self,
           "送信内容の確認 \{page + 1}/\{pages.length()}",
         ),
-        body: join(lines),
+        body: join(pages[page]),
         footer: if last {
-          "タップ 送信  ダブル 取消"
+          "タップで送信  ダブルで取消"
         } else {
-          "タップ 次へ  ダブル 取消"
+          "タップで次へ  ダブルで取消"
         },
       }
     }
     ConfirmStop =>
       {
         title: heading(self, "停止の確認"),
-        body: join(
-          wrap_text(
-            "Ctrl-C を送ってエージェントの実行を止めますか？",
-            BODY_COLUMNS,
-          ),
-        ),
-        footer: "タップ 停止  ダブル 取消",
+        body: "実行を停止しますか？",
+        footer: "タップで停止  ダブルで取消",
       }
     Recording =>
       {
         title: heading(self, "録音中"),
-        body: "話し終えたら離すかタップしてください。",
-        footer: "ダブル 取消",
+        body: "話してください",
+        footer: "離して終了  ダブルで取消",
       }
     Transcribing =>
       {
         title: heading(self, "認識中"),
-        body: "Mac で音声を認識しています...",
-        footer: "ダブル 取消",
+        body: "音声を文字にしています",
+        footer: "ダブルで取消",
       }
     Sending =>
       {
         title: heading(self, "送信中"),
-        body: "Orca に送っています...",
+        body: "Orca に送っています",
         footer: "",
       }
     Notice =>
       {
         title: heading(self, "結果"),
         body: join(paginate(wrap_text(self.notice, BODY_COLUMNS), BODY_ROWS)[0]),
-        footer: "タップ 出力へ",
+        footer: "タップで戻る",
       }
   }
 }

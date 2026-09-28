@@ -86,8 +86,8 @@ test "helpers" {
 }
 
 ///|
-test "display_line shortens rules only" {
-  @debug.debug_inspect(display_line("─".repeat(72)), content="\"--------\"")
+test "display_line hides decorative rules only" {
+  @debug.debug_inspect(display_line("─".repeat(72)), content="\"\"")
   @debug.debug_inspect(
     display_line("── title ──────"),
     content="\"── title ──────\"",

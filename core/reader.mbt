@@ -208,18 +208,23 @@ pub fn Model::selected_session(self : Model) -> Session? {
 /// Pages of the snapshot being read.
 pub fn Model::output_pages(self : Model) -> Array[Array[String]] {
   match self.shown {
-    Some(output) =>
-      paginate_from_end(
-        wrap_lines(output.lines.map(display_line), BODY_COLUMNS),
-        BODY_ROWS,
-      )
+    Some(output) => {
+      let visible : Array[String] = []
+      for line in output.lines {
+        let text = display_line(line)
+        if text.trim().length() > 0 {
+          visible.push(text)
+        }
+      }
+      paginate_from_end(wrap_lines(visible, BODY_COLUMNS), BODY_ROWS)
+    }
     None => paginate([], BODY_ROWS)
   }
 }
 
 ///|
 pub fn Model::draft_pages(self : Model) -> Array[Array[String]] {
-  paginate(wrap_text(self.draft, BODY_COLUMNS), BODY_ROWS - 1)
+  paginate(wrap_text(self.draft, BODY_COLUMNS), BODY_ROWS)
 }
 
 ///|

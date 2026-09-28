@@ -84,7 +84,7 @@ h2 {
   grid-template-rows: 12.5% 1fr 13%;
   gap: 1.4%;
   font-family: ui-monospace, "SF Mono", Menlo, "Hiragino Kaku Gothic ProN", monospace;
-  font-size: clamp(8px, 2.6vw, 15px);
+  font-size: clamp(10px, 3.3vw, 16px);
   line-height: 1.35;
   overflow: hidden;
 }
