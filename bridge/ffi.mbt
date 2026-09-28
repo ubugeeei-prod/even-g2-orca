@@ -74,6 +74,19 @@ extern "js" fn lan_address() -> String =
   #|}
 
 ///|
+/// Print a terminal QR code for the pairing URL when qrencode is available.
+extern "js" fn print_pairing_qr(url : String) -> Bool =
+  #|(url) => {
+  #|  const { spawnSync } = process.getBuiltinModule('node:child_process');
+  #|  const result = spawnSync('qrencode', ['-t', 'UTF8', '-m', '2', url], {
+  #|    encoding: 'utf8', timeout: 5000, maxBuffer: 1024 * 1024,
+  #|  });
+  #|  if (result.error || result.status !== 0 || !result.stdout) return false;
+  #|  process.stdout.write(result.stdout);
+  #|  return true;
+  #|}
+
+///|
 /// One request/response exchange over Orca's local socket. `on_line` returns
 /// true once the exchange is settled; later data and errors are ignored.
 extern "js" fn socket_exchange(

@@ -35,7 +35,7 @@ Orca を起動した Mac で実行します。
 nix run .#bridge
 ```
 
-起動すると **ペアリング用 URL**（`…/#token=…`）を表示します。この URL は操作権限そのものなので共有しないでください。トークンは初回起動時に生成し、`~/Library/Application Support/even-g2-orca/bridge-token`（権限 0600）に保存します。
+起動すると **ペアリング用 QR と URL**（`…/#token=…`）をターミナルに表示します。QR または URL は操作権限そのものなので共有しないでください。トークンは初回起動時に生成し、`~/Library/Application Support/even-g2-orca/bridge-token`（権限 0600）に保存します。ビルドしたブリッジを直接起動する場合は `qrencode` を PATH に入れると QR が表示されます。
 
 設定はカレントディレクトリの `.env` から読み込みます（[.env.example](.env.example)）。
 
@@ -45,7 +45,7 @@ nix run .#bridge
 BRIDGE_HOST=0.0.0.0 nix run .#bridge
 ```
 
-表示された `http://<Mac の IP>:3210/#token=…` を Even App の開発用 URL / QR 読み込みで開きます。LAN 内の通信は HTTP です。
+スマホの Even Realities アプリで G2 を接続します。実機で QR を読み込むには、スマホアプリと同じアカウントで [Even Hub](https://hub.evenrealities.com/login) に開発者としてログインし、アプリを完全終了して開き直す必要があります。その後、アプリの **Even Hub** に現れる開発者用の **Scan QR / Prototype Mode** から、Mac のターミナルに表示された QR を読み取ります。この項目が見えない場合は、先にアカウントとアプリの再起動を確認してください。URL は `http://<Mac の IP>:3210/#token=…` です。通常のスマホブラウザでも開けますが、その場合は G2 に接続しないプレビューになります。LAN 内の通信は HTTP です。
 
 ### 2b. Cloudflare 経由で使う
 
@@ -67,7 +67,7 @@ Cloudflare のアカウント・DNS ゾーンと、Workers / Tunnel / Access / D
    nix run .#tunnel
    ```
 
-5. 表示された `https://<app_hostname>/#token=…` を Even App で開きます。
+5. Even Realities アプリの **Even Hub** に現れる開発者用の **Scan QR / Prototype Mode** から、表示された QR を読み取ります。URL は `https://<app_hostname>/#token=…` です。
 
 Worker は `/api/*` だけを Tunnel のホスト名へ中継し、そのときに自分の Access service token を付けます。Access の資格情報・Tunnel token・Orca の RPC トークンはスマートフォンに渡りません。スマートフォンが持つのはペアリング用トークンだけで、これはブリッジが検証します。
 

@@ -281,9 +281,11 @@ fn main {
       @js.log(
         "Speech: " + (if config.speech() { "whisper.cpp" } else { "off" }),
       )
-      @js.log(
-        "Pairing URL (grants control; do not share):\n  \{public}/#token=\{config.token}",
-      )
+      let pairing_url = "\{public}/#token=\{config.token}"
+      @js.log("Pairing URL (grants control; do not share):\n  \{pairing_url}")
+      if !print_pairing_qr(pairing_url) {
+        @js.warn("QR code unavailable; open the pairing URL above.")
+      }
     },
     fn(reason) {
       @js.warn("Cannot listen on \{config.host}:\{config.port}: \{reason}")

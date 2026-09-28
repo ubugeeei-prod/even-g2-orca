@@ -46,7 +46,10 @@
 
           bridge = pkgs.writeShellApplication {
             name = "even-g2-orca-bridge";
-            runtimeInputs = [ pkgs.nodejs_24 ];
+            runtimeInputs = [
+              pkgs.nodejs_24
+              pkgs.qrencode
+            ];
             # Reads ./.env when present (see .env.example).
             text = ''exec node --env-file-if-exists=.env ${even-g2-orca}/bridge/bridge.js "$@"'';
           };
@@ -164,6 +167,7 @@
               pkgs.cloudflared
               pkgs.openssl
               pkgs.jq
+              pkgs.qrencode
             ];
             shellHook = ''
               export MOON_HOME="''${MOON_HOME:-$HOME/.moon}"
