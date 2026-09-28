@@ -66,6 +66,7 @@ stdenv.mkDerivation {
     export MOON_TOOLCHAIN_ROOT="$PWD/toolchain"
     export PATH="$PWD/toolchain/bin:$PATH"
     export HOME="$TMPDIR"
+    ${lib.optionalString stdenv.hostPlatform.isLinux ''autoPatchelf toolchain/bin''}
     moon -C toolchain/lib/core bundle --all --target js
     runHook postBuild
   '';
