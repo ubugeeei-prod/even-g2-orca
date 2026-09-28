@@ -1,0 +1,4 @@
+account_id      = "0123456789abcdef0123456789abcdef"
+zone_id         = "0123456789abcdef0123456789abcdef"
+app_hostname    = "orca.example.com"
+bridge_hostname = "orca-bridge.example.com"

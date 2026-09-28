@@ -1,0 +1,14 @@
+_build/
+.mooncakes/
+dist/
+result
+result-*
+vendor/
+.env
+.env.*
+!.env.example
+infra/.terraform/
+infra/*.tfstate*
+infra/*.tfvars
+infra/*.tfplan
+.DS_Store

@@ -1,0 +1,48 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - name: MoonBit format and tests, deployable build
+        run: nix flake check -L
+      - name: Worker bundle loads as an ES module
+        run: |
+          nix build -L
+          nix shell nixpkgs#nodejs_24 -c node --input-type=module -e "
+            const worker = (await import('$PWD/result/worker/worker.js')).default;
+            const res = await worker.fetch(new Request('https://app.test/api/info'), {});
+            if (res.status !== 401) throw new Error('expected 401, got ' + res.status);
+          "
+
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.0
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+      - run: terraform test

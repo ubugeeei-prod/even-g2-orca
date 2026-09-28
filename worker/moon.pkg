@@ -1,0 +1,8 @@
+import {
+  "ubugeeei/even_g2_orca/core",
+  "ubugeeei/even_g2_orca/js",
+}
+
+supported_targets = "js"
+
+pkgtype(kind: "executable")

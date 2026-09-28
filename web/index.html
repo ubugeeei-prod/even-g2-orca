@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Orca for G2</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="boot.js"></script>
+  </head>
+  <body data-screen="Setup">
+    <main>
+      <header>
+        <h1>Orca for G2</h1>
+        <dl class="status">
+          <dt>ブリッジ</dt>
+          <dd id="status-bridge">未設定</dd>
+          <dt>G2</dt>
+          <dd id="status-glasses">G2 に接続しています...</dd>
+        </dl>
+      </header>
+
+      <section aria-label="G2 の表示">
+        <div class="lens" role="img" aria-live="polite">
+          <p id="g2-title" class="lens-title"></p>
+          <pre id="g2-body" class="lens-body"></pre>
+          <p id="g2-footer" class="lens-footer"></p>
+        </div>
+        <div class="pad" aria-label="G2 / R1 の操作">
+          <button id="btn-up" type="button" aria-label="上にスワイプ">↑</button>
+          <button id="btn-down" type="button" aria-label="下にスワイプ">↓</button>
+          <button id="btn-tap" type="button">タップ</button>
+          <button id="btn-double" type="button">ダブル</button>
+          <button id="btn-hold" type="button">長押しで録音</button>
+        </div>
+      </section>
+
+      <section class="compose" aria-labelledby="compose-heading">
+        <h2 id="compose-heading">指示を書く</h2>
+        <p id="compose-target" class="note"></p>
+        <textarea id="draft" rows="3" maxlength="16000" placeholder="例: テストを実行して失敗を直して"></textarea>
+        <button id="compose-send" type="button" class="primary">確認へ進む</button>
+        <p class="note">送信は G2 か上の「タップ」で内容を確認してから行います。</p>
+      </section>
+
+      <details class="settings">
+        <summary>接続設定</summary>
+        <label>
+          ブリッジの URL
+          <input id="api-url" type="url" inputmode="url" autocomplete="off" placeholder="空欄ならこのページと同じ接続先" />
+        </label>
+        <label>
+          ペアリング用トークン
+          <input id="token" type="password" autocomplete="off" spellcheck="false" />
+        </label>
+        <div class="row">
+          <button id="settings-save" type="button" class="primary">保存</button>
+          <button id="settings-clear" type="button">この端末から削除</button>
+        </div>
+        <p id="settings-note" class="note" aria-live="polite"></p>
+      </details>
+    </main>
+  </body>
+</html>
