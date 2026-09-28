@@ -9,6 +9,12 @@ pub(all) enum AgentState {
 } derive(Eq, Debug)
 
 ///|
+pub extend AgentState with Eq::{not_equal, equal}
+
+///|
+pub extend AgentState with Debug::{to_repr}
+
+///|
 pub fn AgentState::wire(self : AgentState) -> String {
   match self {
     Working => "working"
@@ -55,6 +61,12 @@ pub(all) struct Session {
 } derive(Eq, Debug)
 
 ///|
+pub extend Session with Eq::{not_equal, equal}
+
+///|
+pub extend Session with Debug::{to_repr}
+
+///|
 pub(all) struct Output {
   session_id : String
   state : AgentState
@@ -65,12 +77,24 @@ pub(all) struct Output {
 } derive(Eq, Debug)
 
 ///|
+pub extend Output with Eq::{not_equal, equal}
+
+///|
+pub extend Output with Debug::{to_repr}
+
+///|
 /// Distinguishes input acceptance from observed execution.
 pub(all) struct Receipt {
   accepted : Bool
   message : String
   request_id : String?
 } derive(Eq, Debug)
+
+///|
+pub extend Receipt with Eq::{not_equal, equal}
+
+///|
+pub extend Receipt with Debug::{to_repr}
 
 ///|
 /// Stable public error: never carries credentials or raw process output.
@@ -81,11 +105,23 @@ pub(all) struct ApiError {
 } derive(Eq, Debug)
 
 ///|
+pub extend ApiError with Eq::{not_equal, equal}
+
+///|
+pub extend ApiError with Debug::{to_repr}
+
+///|
 pub(all) struct BridgeInfo {
   version : String
   speech : Bool
   runtime_ready : Bool
 } derive(Eq, Debug)
+
+///|
+pub extend BridgeInfo with Eq::{not_equal, equal}
+
+///|
+pub extend BridgeInfo with Debug::{to_repr}
 
 ///|
 pub fn api_error(status : Int, code : String, message : String) -> ApiError {

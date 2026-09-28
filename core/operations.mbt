@@ -36,6 +36,12 @@ pub(all) enum Begin {
 } derive(Eq, Debug)
 
 ///|
+pub extend Begin with Eq::{not_equal, equal}
+
+///|
+pub extend Begin with Debug::{to_repr}
+
+///|
 pub fn OperationLog::begin(
   self : OperationLog,
   id : String,

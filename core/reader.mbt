@@ -12,6 +12,12 @@ pub(all) enum Gesture {
 } derive(Eq, Debug)
 
 ///|
+pub extend Gesture with Eq::{not_equal, equal}
+
+///|
+pub extend Gesture with Debug::{to_repr}
+
+///|
 pub(all) enum Screen {
   Setup
   Sessions
@@ -26,6 +32,12 @@ pub(all) enum Screen {
 } derive(Eq, Debug)
 
 ///|
+pub extend Screen with Eq::{not_equal, equal}
+
+///|
+pub extend Screen with Debug::{to_repr}
+
+///|
 pub(all) enum MenuItem {
   Dictate
   Continue
@@ -33,6 +45,12 @@ pub(all) enum MenuItem {
   Stop
   Back
 } derive(Eq, Debug)
+
+///|
+pub extend MenuItem with Eq::{not_equal, equal}
+
+///|
+pub extend MenuItem with Debug::{to_repr}
 
 ///|
 pub fn MenuItem::label(self : MenuItem) -> String {
@@ -51,6 +69,12 @@ pub(all) enum Connection {
   Online
   Offline(String)
 } derive(Eq, Debug)
+
+///|
+pub extend Connection with Eq::{not_equal, equal}
+
+///|
+pub extend Connection with Debug::{to_repr}
 
 ///|
 /// Everything the glasses show is derived from this value.
@@ -75,6 +99,9 @@ pub(all) struct Model {
   mut speech : Bool
   mut configured : Bool
 } derive(Debug)
+
+///|
+pub extend Model with Debug::{to_repr}
 
 ///|
 pub fn Model::new() -> Model {
@@ -118,6 +145,9 @@ pub(all) enum Msg {
 } derive(Debug)
 
 ///|
+pub extend Msg with Debug::{to_repr}
+
+///|
 pub(all) enum Effect {
   LoadInfo
   LoadSessions(Int)
@@ -129,6 +159,12 @@ pub(all) enum Effect {
   FinishRecording(Int)
   CancelRecording
 } derive(Eq, Debug)
+
+///|
+pub extend Effect with Eq::{not_equal, equal}
+
+///|
+pub extend Effect with Debug::{to_repr}
 
 ///|
 pub fn Model::menu_items(self : Model) -> Array[MenuItem] {

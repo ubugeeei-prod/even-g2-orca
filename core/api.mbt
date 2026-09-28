@@ -11,6 +11,12 @@ pub(all) enum Route {
 } derive(Eq, Debug)
 
 ///|
+pub extend Route with Eq::{not_equal, equal}
+
+///|
+pub extend Route with Debug::{to_repr}
+
+///|
 /// Static files served for LAN use; the same set is published as Worker assets.
 pub let assets : Array[String] = [
   "index.html", "boot.js", "app.js", "style.css", "even_hub_sdk.js",

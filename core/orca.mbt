@@ -7,6 +7,12 @@ pub(all) struct RuntimeEndpoint {
 } derive(Eq, Debug)
 
 ///|
+pub extend RuntimeEndpoint with Eq::{not_equal, equal}
+
+///|
+pub extend RuntimeEndpoint with Debug::{to_repr}
+
+///|
 pub fn orca_unavailable() -> ApiError {
   api_error(
     503, "orca_unavailable", "Mac で Orca を起動してください。",
@@ -71,6 +77,12 @@ pub(all) enum RpcFrame {
   Done(Json)
   Failed(ApiError)
 } derive(Eq, Debug)
+
+///|
+pub extend RpcFrame with Eq::{not_equal, equal}
+
+///|
+pub extend RpcFrame with Debug::{to_repr}
 
 ///|
 /// Interpret one response line. Frames for another request or runtime are

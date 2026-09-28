@@ -7,6 +7,12 @@ pub(all) struct Frame {
 } derive(Eq, Debug)
 
 ///|
+pub extend Frame with Eq::{not_equal, equal}
+
+///|
+pub extend Frame with Debug::{to_repr}
+
+///|
 pub fn Frame::to_json(self : Frame) -> Json {
   {
     "title": Json::string(self.title),

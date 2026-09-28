@@ -12,6 +12,12 @@ pub(all) enum Relay {
 } derive(Eq, Debug)
 
 ///|
+pub extend Relay with Eq::{not_equal, equal}
+
+///|
+pub extend Relay with Debug::{to_repr}
+
+///|
 /// The configured bridge origin must be exactly `https://host`.
 pub fn normalize_bridge_origin(value : String) -> String? {
   let raw = value.trim().to_owned()

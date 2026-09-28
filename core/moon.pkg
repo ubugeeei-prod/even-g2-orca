@@ -1,4 +1,7 @@
 import {
   "moonbitlang/core/json",
-  "moonbitlang/core/debug",
 }
+
+import {
+  "moonbitlang/core/debug",
+} for "wbtest"
