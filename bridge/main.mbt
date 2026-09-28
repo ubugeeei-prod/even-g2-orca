@@ -283,7 +283,16 @@ fn main {
       )
       let pairing_url = "\{public}/#token=\{config.token}"
       @js.log("Pairing URL (grants control; do not share):\n  \{pairing_url}")
-      if !print_pairing_qr(pairing_url) {
+      if config.public_url == "" &&
+        (
+          config.host == "127.0.0.1" ||
+          config.host == "localhost" ||
+          config.host == "::1"
+        ) {
+        @js.warn(
+          "This address works only on this Mac. For a phone on the same Wi-Fi, restart with BRIDGE_HOST=0.0.0.0 nix run .#bridge.",
+        )
+      } else if !print_pairing_qr(pairing_url) {
         @js.warn("QR code unavailable; open the pairing URL above.")
       }
     },
