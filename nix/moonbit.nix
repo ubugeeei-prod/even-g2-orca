@@ -49,6 +49,8 @@ stdenv.mkDerivation {
   ]
   ++ lib.optional (stdenv.hostPlatform.isLinux && autoPatchelfHook != null) autoPatchelfHook;
 
+  buildInputs = lib.optional stdenv.hostPlatform.isLinux stdenv.cc.cc.lib;
+
   unpackPhase = ''
     runHook preUnpack
     mkdir -p toolchain
