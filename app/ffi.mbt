@@ -158,7 +158,7 @@ extern "js" fn g2_connect(
   #|      // Protobuf omits the zero value, so an input event without a type is a click.
   #|      const type = event.textEvent ? kind(event.textEvent.eventType) ?? 0
   #|        : event.listEvent ? kind(event.listEvent.eventType) ?? 0
-  #|        : event.sysEvent ? kind(event.sysEvent.eventType) : undefined;
+  #|        : event.sysEvent ? kind(event.sysEvent.eventType) ?? 0 : undefined;
   #|      if (type !== undefined) onEvent(type);
   #|    });
   #|    done(true, '');
