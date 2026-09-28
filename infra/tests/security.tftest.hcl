@@ -6,7 +6,7 @@ variables {
   zone_id         = "00000000000000000000000000000000"
   app_hostname    = "orca.example.com"
   bridge_hostname = "orca-bridge.example.com"
-  dist_dir        = "tests/fixtures/dist"
+  dist_dir        = "tests/fixtures/build"
 }
 
 run "bridge_is_reachable_only_through_the_worker" {

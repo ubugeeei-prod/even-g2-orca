@@ -9,24 +9,24 @@
     "`version` is informational; the hashes are what is enforced."
   ],
   "moonbit": {
-    "version": "0.1.20260827",
-    "moonc": "v0.10.11+8f8e8db1e",
-    "date": "2026-08-27",
+    "version": "latest@2026-09-28",
+    "moonc": "v0.10.14+7d59c7ec9",
+    "date": "2026-09-28",
     "baseUrl": "https://cli.moonbitlang.com/binaries/latest",
     "coreUrl": "https://cli.moonbitlang.com/cores/core-latest.zip",
-    "coreHash": "sha256-+wqrskwLEkN4OhP+a2EDMPgDH+BPC3lFs/vXkCJJnOg=",
+    "coreHash": "sha256-Y+W5mZGsj9SVVrHhe9y9xmLXlwACUN0R7wkPOKIXXoQ=",
     "platforms": {
       "aarch64-darwin": {
         "asset": "moonbit-darwin-aarch64.tar.gz",
-        "hash": "sha256-6WSVpQMXOM7oU7vq1M9z96hOt1GKAXT+vW+SpFQaQuQ="
+        "hash": "sha256-IJZ/k4msVFCIme4vwFGjRw0FFFK6xYGKlpbtTBRPPsM="
       },
       "x86_64-linux": {
         "asset": "moonbit-linux-x86_64.tar.gz",
-        "hash": "sha256-vXyAnf93iYjMc1gEbMaOETiNGnKeWvr4cy/QZrE+8F4="
+        "hash": "sha256-kiZpTen/l42x7Pggt3EMQiToTsenaxmiItlvDNTjG2o="
       },
       "aarch64-linux": {
         "asset": "moonbit-linux-aarch64.tar.gz",
-        "hash": "sha256-y2F2o/9+NSthLLelnqyRoyMo1gRAmJomtzAuHnHUmCc="
+        "hash": "sha256-ZEP9R7OeEO4lvfoCUJIeE6OmhknAKDeqOCUSt9GHx5A="
       }
     }
   }
